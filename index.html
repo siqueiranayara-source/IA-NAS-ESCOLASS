@@ -1,481 +1,58 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🤖 Analisador de Sentimentos com IA</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: #0a1e2e;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 900px;
-            width: 100%;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 40px;
-            animation: fadeIn 0.8s ease;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .header h1 {
-            color: #00d4ff;
-            font-size: 2.8em;
-            margin-bottom: 10px;
-            text-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
-        }
-
-        .header p {
-            color: #a0c8d8;
-            font-size: 1.1em;
-        }
-
-        .card-analisador {
-            background: rgba(26, 58, 82, 0.8);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border-radius: 20px;
-            border: 1px solid rgba(0, 212, 255, 0.2);
-            padding: 40px;
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6);
-            transition: all 0.3s ease;
-            margin-bottom: 30px;
-        }
-
-        .card-analisador:hover {
-            transform: scale(1.02);
-            box-shadow: 0 35px 70px rgba(0, 212, 255, 0.3);
-            border-color: rgba(0, 212, 255, 0.4);
-        }
-
-        .form-group {
-            margin-bottom: 25px;
-        }
-
-        .form-group label {
-            display: block;
-            color: #00d4ff;
-            font-weight: 600;
-            margin-bottom: 10px;
-            font-size: 1.05em;
-        }
-
-        .form-group textarea {
-            width: 100%;
-            padding: 15px;
-            border: 2px solid rgba(0, 212, 255, 0.2);
-            border-radius: 12px;
-            background: rgba(10, 30, 46, 0.6);
-            color: #e0f4ff;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            font-size: 1em;
-            resize: vertical;
-            min-height: 120px;
-            transition: all 0.3s ease;
-        }
-
-        .form-group textarea:focus {
-            outline: none;
-            border-color: #00d4ff;
-            background: rgba(10, 30, 46, 0.8);
-            box-shadow: 0 0 15px rgba(0, 212, 255, 0.2);
-        }
-
-        .form-group textarea::placeholder {
-            color: #6a8a9a;
-        }
-
-        .btn-analisar {
-            width: 100%;
-            padding: 15px;
-            background: linear-gradient(90deg, #00b4d8, #0096c7);
-            border: none;
-            border-radius: 12px;
-            color: #fff;
-            font-size: 1.1em;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 8px 20px rgba(0, 180, 216, 0.3);
-            border: 1px solid rgba(0, 212, 255, 0.3);
-        }
-
-        .btn-analisar:hover {
-            transform: translateY(-3px) scale(1.02);
-            box-shadow: 0 12px 30px rgba(0, 212, 255, 0.5);
-            background: linear-gradient(90deg, #0096c7, #00b4d8);
-        }
-
-        .btn-analisar:active {
-            transform: translateY(-1px);
-        }
-
-        .resultado {
-            background: rgba(26, 58, 82, 0.8);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border-radius: 20px;
-            border: 2px solid rgba(0, 212, 255, 0.3);
-            padding: 30px;
-            margin-top: 30px;
-            display: none;
-            animation: slideIn 0.5s ease;
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6);
-        }
-
-        .resultado.ativo {
-            display: block;
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .resultado h2 {
-            color: #00d4ff;
-            margin-bottom: 20px;
-            font-size: 1.6em;
-        }
-
-        .resultado-item {
-            background: rgba(0, 212, 255, 0.05);
-            border-left: 4px solid #00d4ff;
-            padding: 15px;
-            margin-bottom: 15px;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-        }
-
-        .resultado-item:hover {
-            background: rgba(0, 212, 255, 0.1);
-            transform: translateX(5px);
-            box-shadow: 0 4px 12px rgba(0, 212, 255, 0.2);
-        }
-
-        .resultado-item.positivo {
-            border-left-color: #00ff88;
-            background: rgba(0, 255, 136, 0.05);
-        }
-
-        .resultado-item.positivo:hover {
-            background: rgba(0, 255, 136, 0.1);
-            box-shadow: 0 4px 12px rgba(0, 255, 136, 0.2);
-        }
-
-        .resultado-item.negativo {
-            border-left-color: #ff6b6b;
-            background: rgba(255, 107, 107, 0.05);
-        }
-
-        .resultado-item.negativo:hover {
-            background: rgba(255, 107, 107, 0.1);
-            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.2);
-        }
-
-        .resultado-item.neutro {
-            border-left-color: #ffd700;
-            background: rgba(255, 215, 0, 0.05);
-        }
-
-        .resultado-item.neutro:hover {
-            background: rgba(255, 215, 0, 0.1);
-            box-shadow: 0 4px 12px rgba(255, 215, 0, 0.2);
-        }
-
-        .resultado-texto {
-            color: #e0f4ff;
-            margin-bottom: 10px;
-            font-size: 1.05em;
-        }
-
-        .resultado-label {
-            color: #00d4ff;
-            font-weight: 600;
-            font-size: 0.9em;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .resultado-valor {
-            color: #fff;
-            font-size: 1.3em;
-            font-weight: 700;
-        }
-
-        .barra-sentimento {
-            width: 100%;
-            height: 8px;
-            background: rgba(0, 212, 255, 0.1);
-            border-radius: 10px;
-            margin-top: 10px;
-            overflow: hidden;
-        }
-
-        .barra-preenchida {
-            height: 100%;
-            background: linear-gradient(90deg, #00b4d8, #00ff88);
-            transition: width 0.5s ease;
-            border-radius: 10px;
-        }
-
-        .barra-preenchida.negativo {
-            background: linear-gradient(90deg, #ff6b6b, #ff4757);
-        }
-
-        .barra-preenchida.neutro {
-            background: linear-gradient(90deg, #ffd700, #ffb700);
-        }
-
-        .exemplos {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 15px;
-            margin-top: 30px;
-        }
-
-        .exemplo-btn {
-            background: rgba(0, 212, 255, 0.1);
-            border: 1px solid rgba(0, 212, 255, 0.3);
-            color: #e0f4ff;
-            padding: 12px;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 0.95em;
-            font-weight: 500;
-        }
-
-        .exemplo-btn:hover {
-            background: rgba(0, 212, 255, 0.2);
-            transform: scale(1.05);
-            box-shadow: 0 6px 16px rgba(0, 212, 255, 0.2);
-            border-color: #00d4ff;
-        }
-
-        .footer {
-            text-align: center;
-            margin-top: 40px;
-            color: #6a8a9a;
-            font-size: 0.9em;
-        }
-
-        .footer a {
-            color: #00d4ff;
-            text-decoration: none;
-            transition: all 0.3s ease;
-        }
-
-        .footer a:hover {
-            color: #fff;
-            text-shadow: 0 0 10px rgba(0, 212, 255, 0.4);
-        }
-
-        @media (max-width: 600px) {
-            .header h1 {
-                font-size: 2em;
-            }
-
-            .card-analisador {
-                padding: 25px;
-            }
-
-            .exemplos {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
-</head>
-<body>
-
-    <div class="container">
-        <div class="header">
-            <h1>🤖 Analisador de Sentimentos com IA</h1>
-            <p>Descubra o sentimento de qualquer texto em tempo real!</p>
-        </div>
-
-        <div class="card-analisador">
-            <div class="form-group">
-                <label for="texto">Digite sua frase aqui:</label>
-                <textarea 
-                    id="texto" 
-                    placeholder="Ex: Estou muito feliz com este projeto! Adorei aprender IA nas escolas."
-                ></textarea>
-            </div>
-
-            <button class="btn-analisar" onclick="analisarSentimento()">
-                ✨ Analisar Sentimento
-            </button>
-
-            <div style="margin-top: 25px; border-top: 1px solid rgba(0, 212, 255, 0.2); padding-top: 25px;">
-                <p style="color: #00d4ff; margin-bottom: 12px; font-weight: 600;">📝 Exemplos:</p>
-                <div class="exemplos">
-                    <button class="exemplo-btn" onclick="preencherExemplo('Estou muito feliz hoje! 😊')">
-                        😊 Positivo
-                    </button>
-                    <button class="exemplo-btn" onclick="preencherExemplo('Que dia péssimo e ruim...')">
-                        😞 Negativo
-                    </button>
-                    <button class="exemplo-btn" onclick="preencherExemplo('O tempo está nublado.')">
-                        😐 Neutro
-                    </button>
-                    <button class="exemplo-btn" onclick="preencherExemplo('Adorei este novo projeto de IA!')">
-                        🎉 Entusiasmado
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <div class="resultado" id="resultado">
-            <h2>📊 Resultado da Análise</h2>
-            <div id="resultado-conteudo"></div>
-        </div>
-
-        <div class="footer">
-            <p>🚀 Desenvolvido com HTML, CSS e ❤️ para fins educacionais</p>
-            <p>Projeto <strong>IA nas Escolas</strong> - <a href="https://github.com/siqueiranayara-source/IA-NAS-ESCOLASS">Ver no GitHub</a></p>
-        </div>
-    </div>
-
-    <script>
-        // Dados de sentimentos para análise
-        const palavrasPositivas = [
-            'feliz', 'alegre', 'adorei', 'ótimo', 'excelente', 'maravilhoso', 'incrível', 'perfeito',
-            'amor', 'lindo', 'legal', 'bacana', 'show', 'sucesso', 'vitória', 'ganhar', 'amei',
-            'bom', 'melhor', 'boa', 'legal', 'fantástico', 'sensacional', 'magnífico'
-        ];
-
-        const palavrasNegativas = [
-            'triste', 'ruim', 'péssimo', 'horrível', 'terrível', 'detesto', 'odeio', 'chato',
-            'frustrado', 'decepcionado', 'raiva', 'angústia', 'medo', 'nervoso', 'estresse',
-            'problema', 'erro', 'falha', 'mal', 'pior', 'fraco', 'desastre', 'tragédia'
-        ];
-
-        function analisarSentimento() {
-            const texto = document.getElementById('texto').value.trim();
-
-            if (!texto) {
-                alert('Por favor, digite uma frase para analisar! 📝');
-                return;
-            }
-
-            const textoLower = texto.toLowerCase();
+<!DOCTYPE html><html lang="pt-BR"><head>  <meta charset="UTF-8">  <meta name="viewport" content="width=device-width, initial-scale=1.0">  <title>Cards com Hover e Dark Mode</title>  <style>    * {      margin: 0;      padding: 0;      box-sizing: border-box;    }
+    body {      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;      background: #f5f7fb;      color: #1e1e2f;      padding: 2rem;      min-height: 100vh;      display: flex;      flex-direction: column;      align-items: center;      transition: background 0.3s ease, color 0.3s ease;    }
+    .cards-grid {      display: flex;      flex-wrap: wrap;      justify-content: center;      gap: 2rem;      max-width: 1200px;      margin: 2rem auto;    }
+    .card {      background: #ffffff;      border-radius: 1.5rem;      padding: 1.8rem 1.5rem 2rem;      width: 280px;      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06), 0 4px 12px rgba(0, 0, 0, 0.05);      transition: transform 0.25s ease, box-shadow 0.3s ease;      border: 1px solid rgba(255, 255, 255, 0.1);    }
+    .card:hover {      transform: scale(1.02);      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12), 0 8px 24px rgba(0, 0, 0, 0.08);    }
+    .card h3 {      font-size: 1.5rem;      font-weight: 600;      margin-bottom: 0.75rem;      letter-spacing: -0.01em;    }
+    .card .tag {      display: inline-block;      background: #eef2f6;      color: #2c3e50;      font-size: 0.75rem;      font-weight: 600;      padding: 0.25rem 0.8rem;      border-radius: 20px;      margin-bottom: 1rem;      text-transform: uppercase;      letter-spacing: 0.03em;    }
+    .card p {      line-height: 1.6;      color: #3d3d4f;      margin-bottom: 1.2rem;      font-size: 0.95rem;    }
+    .card .autor {      display: flex;      align-items: center;      gap: 0.6rem;      border-top: 1px solid #e9edf2;      padding-top: 1rem;      margin-top: 0.5rem;      font-size: 0.9rem;      color: #4a4a5a;    }
+    .card .autor span {      font-weight: 500;    }
+    body.dark-mode {      background: #12121c;      color: #eaeef5;    }
+    body.dark-mode .card {      background: #1e1e2e;      border-color: #2a2a3e;      box-shadow: 0 8px 20px rgba(0, 20, 40, 0.5), 0 4px 12px rgba(0, 10, 30, 0.4);    }
+    body.dark-mode .card:hover {      transform: scale(1.02);      box-shadow: 0 16px 40px rgba(80, 140, 255, 0.25), 0 8px 24px rgba(60, 120, 240, 0.2);    }
+    body.dark-mode .card h3 {      color: #f0f4ff;    }
+    body.dark-mode .card .tag {      background: #2a2a40;      color: #b0c8ff;    }
+    body.dark-mode .card p {      color: #c8d0e0;    }
+    body.dark-mode .card .autor {      border-top-color: #2f2f46;      color: #aab4cc;    }
+    .toggle-wrapper {      display: flex;      justify-content: center;      margin-top: 0.5rem;    }
+    .toggle-btn {      background: #2d3b52;      border: none;      color: white;      padding: 0.7rem 1.8rem;      border-radius: 60px;      font-weight: 600;      font-size: 1rem;      cursor: pointer;      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);      transition: background 0.2s, transform 0.1s;      letter-spacing: 0.02em;    }
+    .toggle-btn:hover {      background: #1f2a3b;      transform: scale(1.02);    }
+    body.dark-mode .toggle-btn {      background: #3a4b6e;      color: #f0f4ff;      box-shadow: 0 4px 16px rgba(60, 100, 200, 0.3);    }
+    body.dark-mode .toggle-btn:hover {      background: #4f66a0;    }
+    .page-title {      text-align: center;      margin-bottom: 0.5rem;    }
+    .page-title h1 {      font-weight: 600;      font-size: 2.2rem;      letter-spacing: -0.02em;    }
+    .page-title p {      color: #5b5b70;      margin-top: 0.2rem;    }
+    body.dark-mode .page-title p {      color: #9aaec9;    }
+    footer {      margin-top: 3rem;      font-size: 0.9rem;      color: #6b6b82;    }
+    body.dark-mode footer {      color: #7a8aa8;    }
+    @media (max-width: 700px) {      .cards-grid {        gap: 1.5rem;      }      .card {        width: 100%;        max-width: 340px;      }    }  </style></head><body>  <div class="page-title">    <h1> Desafio dos Cards</h1>    <p>Passe o mouse sobre os cards e ative o modo escuro </p>  </div>
+  <div class="toggle-wrapper">    <button class="toggle-btn" id="darkModeToggle"> Ativar modo escuro</button>  </div>
+  <div class="cards-grid">    <article class="card">      <div class="tag">Design</div>      <h3>Interface Adaptativa</h3>      <p>Cards que reagem ao hover com escala e sombra dinâmica. Perfeito para dar vida ao projeto.</p>      <div class="autor">        <span> Ana Clara</span> · 2 min      </div>    </article>
+    <article class="card">      <div class="tag">Desenvolvimento</div>      <h3>Transform &amp; Box-shadow</h3>      <p>Efeito de profundidade com <code>scale(1.02)</code> e sombra que muda de intensidade no hover.</p>      <div class="autor">        <span> Bruno Mendes</span> · 5 min      </div>    </article>
+    <article class="card">      <div class="tag">UX</div>      <h3>Modo Escuro</h3>      <p>No dark mode, a sombra dos cards ganha um tom azulado brilhante, mantendo a elegância.</p>      <div class="autor">        <span> Carla Souza</span> · 3 min      </div>    </article>
+    <article class="card">      <div class="tag">Front-end</div>      <h3>Estilos Profissionais</h3>      <p>Transições suaves, hover responsivo e cores que se adaptam ao tema claro/escuro.</p>      <div class="autor">        <span> Daniel R.</span> · 4 min      </div>    </article>  </div>
+  <footer>    ✦ Desafio concluído — cards com hover, sombra e dark mode ✦  </footer>
+  <script>    (function() {      const toggleBtn = document.getElementById('darkModeToggle');      const body = document.body;
+      const savedMode = localStorage.getItem('darkMode');      if (savedMode === 'enabled') {        body.classList.add('dark-mode');        toggleBtn.textContent = ' Ativar modo claro';      }
+      toggleBtn.addEventListener('click', function() {        body.classList.toggle('dark-mode');        const isDark = body.classList.contains('dark-mode');        toggleBtn.textContent = isDark ? ' Ativar modo claro' : ' Ativar modo escuro';        localStorage.setItem('darkMode', isDark ? 'enabled' : 'disabled');      });    })();  </script></body></html>
             
-            let contagemPositiva = 0;
-            let contagemNegativa = 0;
+       
+       
+       
 
-            // Contar palavras positivas
-            palavrasPositivas.forEach(palavra => {
-                if (textoLower.includes(palavra)) {
-                    contagemPositiva++;
-                }
-            });
+        
+           
 
-            // Contar palavras negativas
-            palavrasNegativas.forEach(palavra => {
-                if (textoLower.includes(palavra)) {
-                    contagemNegativa++;
-                }
-            });
+        
+       
 
-            // Calcular sentimento
-            let sentimento = '';
-            let emoji = '';
-            let classe = '';
-            let percentual = 0;
+      
+    
+          
+          
+  
 
-            if (contagemPositiva > contagemNegativa) {
-                sentimento = 'POSITIVO';
-                emoji = '😊';
-                classe = 'positivo';
-                percentual = Math.min((contagemPositiva / (contagemPositiva + contagemNegativa + 1)) * 100, 100);
-            } else if (contagemNegativa > contagemPositiva) {
-                sentimento = 'NEGATIVO';
-                emoji = '😞';
-                classe = 'negativo';
-                percentual = Math.min((contagemNegativa / (contagemPositiva + contagemNegativa + 1)) * 100, 100);
-            } else {
-                sentimento = 'NEUTRO';
-                emoji = '😐';
-                classe = 'neutro';
-                percentual = 50;
-            }
+       
 
-            // Exibir resultado
-            const resultadoDiv = document.getElementById('resultado');
-            const conteudo = document.getElementById('resultado-conteudo');
-
-            let html = `
-                <div class="resultado-item ${classe}">
-                    <div class="resultado-label">Sentimento Detectado</div>
-                    <div class="resultado-valor">${emoji} ${sentimento}</div>
-                    <div class="barra-sentimento">
-                        <div class="barra-preenchida ${classe}" style="width: ${percentual}%"></div>
-                    </div>
-                </div>
-
-                <div class="resultado-item">
-                    <div class="resultado-label">Análise Detalhada</div>
-                    <div class="resultado-texto">
-                        <strong>Palavras Positivas:</strong> ${contagemPositiva} 🌟<br>
-                        <strong>Palavras Negativas:</strong> ${contagemNegativa} ⚠️<br>
-                        <strong>Confiança:</strong> ${Math.round(percentual)}%
-                    </div>
-                </div>
-
-                <div class="resultado-item">
-                    <div class="resultado-label">Frase Analisada</div>
-                    <div class="resultado-texto">"${texto}"</div>
-                </div>
-            `;
-
-            conteudo.innerHTML = html;
-            resultadoDiv.classList.add('ativo');
-        }
-
-        function preencherExemplo(texto) {
-            document.getElementById('texto').value = texto;
-            document.getElementById('texto').focus();
-        }
-
-        // Permitir Enter para analisar
-        document.getElementById('texto').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter' && e.ctrlKey) {
-                analisarSentimento();
-            }
-        });
-    </script>
-
-</body>
-</html>
+       
